@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Abir-007\\Practise\\workflowx_api\\logs\\.2f6a424c8911bc60457579e73a77097caa594931-audit.json",
+    "files": [
+        {
+            "date": 1744790969778,
+            "name": "C:\\Abir-007\\Practise\\workflowx_api\\logs\\2025-04-16-exceptions.log",
+            "hash": "3193391eb36cb534a302e67b025e949f3aedf422efc0e1e0f31f6245921caf7c"
+        }
+    ],
+    "hashType": "sha256"
+}
