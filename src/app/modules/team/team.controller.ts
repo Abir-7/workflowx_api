@@ -4,9 +4,21 @@ import httpStatus from "http-status";
 import { TeamService } from "./team.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { getRelativePath } from "../../middleware/fileUpload/getRelativeFilePath";
 
 const createTeam = catchAsync(async (req: Request, res: Response) => {
-  const result = await TeamService.createTeam(req.body);
+  const value = req.body;
+  const userId = req.user.userId;
+  if (req.file) {
+    value.image = getRelativePath(req.file.path);
+  }
+
+  if (userId) {
+    value.leader = userId;
+    value.members.push(userId);
+  }
+
+  const result = await TeamService.createTeam(value);
 
   sendResponse(res, {
     success: true,

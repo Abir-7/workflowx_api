@@ -1,10 +1,11 @@
 import { Types } from "mongoose";
 
 export interface IProjectPhase {
-  name: string;
+  name: TPhase;
   budget: number;
   members: string[];
   deadline: Date;
+  status: IPhaseStatus;
 }
 
 export interface IUpdateLog {
@@ -21,10 +22,9 @@ export interface IProject {
   googleSheetLink: string;
   teamId: Types.ObjectId;
   assignedMembers: Types.ObjectId[];
-  currentPhase: IProjectPhase;
   phases: IProjectPhase[];
   totalBudget: number;
-  duration: Date;
+  duration: number; // in month
   lastUpdate: IUpdateLog[];
   description: string;
   salesName: string;
@@ -36,7 +36,27 @@ export const status = {
   ONGOING: "ONGOING",
   CENCELED: "CENCELED",
 } as const;
-
 export const projectStatus = Object.values(status);
-
 export type IStatus = keyof typeof status;
+
+export const phaseStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+export const projectPhaseStatus = Object.values(phaseStatus);
+export type IPhaseStatus = keyof typeof phaseStatus;
+
+export const phases = [
+  "UI/UX",
+  "R&D",
+  "API_DEVELOPMENT",
+  "API_INTIGRATION",
+  "DASHBOARD_DESIGN",
+  "DASHBOARD_INTIGRATION",
+  "WEBSITE_DESIGN",
+  "WEBSITE_DEPLOYMENT",
+  "APP_DEPLOYMENT",
+  "APP_DESIGN",
+] as const;
+
+type TPhase = (typeof phases)[number];

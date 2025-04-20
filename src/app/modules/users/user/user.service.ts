@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { IUserProfile } from "./../userProfile/userProfile.interface";
 import status from "http-status";
 import AppError from "../../../errors/AppError";
@@ -13,6 +14,7 @@ import User from "./user.model";
 import { AdminProfile } from "../adminProfile/adminProfile.model";
 import { IAdminProfile } from "../adminProfile/adminProfile.interface";
 import { removeFalsyFields } from "../../../utils/helper/removeFalsyField";
+import { TUserRole } from "../../../interface/auth.interface";
 
 const createUser = async (data: {
   email: string;
@@ -29,7 +31,7 @@ const createUser = async (data: {
 
   //user data
   const userData = {
-    email: data.email,
+    email: data.email.toLowerCase(),
     password: hashedPassword,
     authentication: { otp, expDate },
   };
@@ -56,13 +58,13 @@ const createUser = async (data: {
 const updateProfileImage = async (path: string, email: string) => {
   const image = getRelativePath(path);
 
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: email.toLowerCase() });
 
   let updated;
 
   if (user?.role === "USER") {
     updated = await UserProfile.findOneAndUpdate(
-      { email: email },
+      { email: email.toLowerCase() },
       { image },
       { new: true }
     );
@@ -70,7 +72,7 @@ const updateProfileImage = async (path: string, email: string) => {
 
   if (user?.role === "ADMIN") {
     updated = await AdminProfile.findOneAndUpdate(
-      { email: email },
+      { email: email.toLowerCase() },
       { image },
       { new: true }
     );
@@ -88,18 +90,26 @@ const updateProfileData = async (
   email: string
 ): Promise<IAdminProfile | IUserProfile | null> => {
   const data = removeFalsyFields(userdata);
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: email.toLowerCase() });
   let updated;
 
   if (user?.role === "ADMIN") {
-    updated = await AdminProfile.findOneAndUpdate({ email: email }, data, {
-      new: true,
-    });
+    updated = await AdminProfile.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      data,
+      {
+        new: true,
+      }
+    );
   }
-  if (user?.role === "USER") {
-    updated = await UserProfile.findOneAndUpdate({ email: email }, data, {
-      new: true,
-    });
+  if (user?.role === "USER" || user?.role === "LEADER") {
+    updated = await UserProfile.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      data,
+      {
+        new: true,
+      }
+    );
   }
   if (!updated) {
     throw new AppError(status.BAD_REQUEST, "Failed to update user info.");
@@ -108,8 +118,24 @@ const updateProfileData = async (
   return updated;
 };
 
+const updateUserRole = async (data: {
+  email: string;
+  role: Exclude<TUserRole, "ADMIN">;
+}) => {
+  const isExist = await User.findOneAndUpdate(
+    { email: data.email.toLowerCase() },
+    { role: data.role },
+    { new: true }
+  );
+  if (!isExist) {
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  return isExist;
+};
+
 export const UserService = {
   createUser,
   updateProfileImage,
   updateProfileData,
+  updateUserRole,
 };

@@ -8,14 +8,34 @@ const createProject = async (projectData: IProject): Promise<IProject> => {
 };
 
 const getAllProjects = async (): Promise<IProject[]> => {
-  return await Project.find().populate(
-    "teamId assignedMembers projectGroup currentPhase members lastUpdate.updatedBy"
-  );
+  const data = await Project.find()
+    .populate({
+      path: "assignedMembers",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName position email phone image user -_id",
+    })
+    .populate({
+      path: "phases.members",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName  image -_id",
+    })
+    .populate("teamId")
+    .populate("projectGroup")
+    .populate({
+      path: "lastUpdate.updatedBy",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName  image -_id",
+    });
+
+  return data;
 };
 
 const getProjectById = async (id: string): Promise<IProject | null> => {
   return await Project.findById(id).populate(
-    "teamId assignedMembers projectGroup currentPhase members lastUpdate.updatedBy"
+    "teamId assignedMembers projectGroup  assignedMembers lastUpdate.updatedBy"
   );
 };
 
