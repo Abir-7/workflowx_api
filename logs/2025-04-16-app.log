@@ -122,3 +122,6 @@
 {"level":"info","message":"MongoDB connected","service":"your-service-name","timestamp":"2025-04-16 14:36:50"}
 {"level":"info","message":"✅ Super Admin already exists. Skipping seeding.","service":"your-service-name","timestamp":"2025-04-16 14:36:50"}
 {"level":"info","message":"Example app listening on port 5000 & ip:192.168.10.18","service":"your-service-name","timestamp":"2025-04-16 14:36:51"}
+{"level":"info","message":"MongoDB connected","service":"your-service-name","timestamp":"2025-04-16 14:36:55"}
+{"level":"info","message":"✅ Super Admin already exists. Skipping seeding.","service":"your-service-name","timestamp":"2025-04-16 14:36:55"}
+{"level":"info","message":"Example app listening on port 5000 & ip:192.168.10.18","service":"your-service-name","timestamp":"2025-04-16 14:36:55"}

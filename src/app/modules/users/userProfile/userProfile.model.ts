@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
-import { IUserProfile } from "./userProfile.interface";
+import { IUserProfile, Position } from "./userProfile.interface";
 
 const userProfileSchema = new Schema<IUserProfile>({
   fullName: { type: String },
-  position: { type: String },
+  position: { type: String, enum: Object.values(Position) },
   nickName: { type: String },
   dateOfBirth: { type: Date },
   email: { type: String, unique: true },

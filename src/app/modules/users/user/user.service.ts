@@ -18,6 +18,10 @@ const createUser = async (data: {
   email: string;
   fullName: string;
   password: string;
+  phone: string;
+  photo: string;
+  image: string;
+  position: string;
 }): Promise<Partial<IUser>> => {
   const hashedPassword = await getHashedPassword(data.password);
   const otp = getOtp(4);
@@ -36,6 +40,9 @@ const createUser = async (data: {
     fullName: data.fullName,
     email: createdUser.email,
     user: createdUser._id,
+    phone: data.phone,
+    image: data.image,
+    position: data.position,
   };
   await UserProfile.create(userProfileData);
   await sendEmail(

@@ -2,10 +2,14 @@ import status from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { UserService } from "./user.service";
+import { getRelativePath } from "../../../middleware/fileUpload/getRelativeFilePath";
 
 const createUser = catchAsync(async (req, res) => {
   const userData = req.body;
-  const result = await UserService.createUser(userData);
+
+  const image = getRelativePath(req.file?.path as string);
+
+  const result = await UserService.createUser({ ...userData, image });
 
   sendResponse(res, {
     success: true,

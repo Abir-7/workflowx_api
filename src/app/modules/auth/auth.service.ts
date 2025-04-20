@@ -93,6 +93,7 @@ const verifyUser = async (
   let updatedUser;
   let token = null;
   if (user.user.isVerified) {
+    console.log("gg");
     token = jsonWebToken.generateToken(
       { userEmail: user.email },
       appConfig.jwt.jwt_access_secret as string,
@@ -106,7 +107,7 @@ const verifyUser = async (
       {
         "authentication.otp": null,
         "authentication.expDate": expDate,
-        "authentication.needToResetPass": true,
+        needToResetPass: true,
         "authentication.token": token,
       },
       { new: true }
@@ -211,7 +212,8 @@ const resetPassword = async (
     { email: decode.userEmail },
     {
       password: hassedPassword,
-      authentication: { opt: null, token: null, expDate: null },
+      authentication: { otp: null, token: null, expDate: null },
+      needToResetPass: false,
     },
     { new: true }
   );
@@ -298,6 +300,28 @@ const updatePassword = async (
   return { user: user.email, message: "Password successfully updated." };
 };
 
+const reSendOtp = async (userEmail: string) => {
+  const OTP = getOtp(4);
+
+  const updateUser = await User.findOneAndUpdate(
+    { email: userEmail },
+    {
+      $set: {
+        "authentication.otp": OTP,
+        "authentication.expDate": new Date(Date.now() + 10 * 60 * 1000), //10min
+      },
+    },
+    { new: true }
+  );
+
+  if (!updateUser) {
+    throw new AppError(500, "Failed to Send. Try Again!");
+  }
+
+  await sendEmail(userEmail, "Verification Code", `CODE: ${OTP}`);
+  return { message: "Verification Code Send" };
+};
+
 export const AuthService = {
   userLogin,
   verifyUser,
@@ -305,4 +329,5 @@ export const AuthService = {
   resetPassword,
   getNewAccessToken,
   updatePassword,
+  reSendOtp,
 };

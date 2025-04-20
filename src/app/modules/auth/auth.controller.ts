@@ -83,6 +83,17 @@ const updatePassword = catchAsync(async (req, res) => {
   });
 });
 
+const reSendOtp = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await AuthService.reSendOtp(email);
+  sendResponse(res, {
+    data: result,
+    success: true,
+    statusCode: status.OK,
+    message: "Verification Code send successfully",
+  });
+});
+
 export const AuthController = {
   verifyUser,
   forgotPasswordRequest,
@@ -90,4 +101,5 @@ export const AuthController = {
   userLogin,
   getNewAccessToken,
   updatePassword,
+  reSendOtp,
 };

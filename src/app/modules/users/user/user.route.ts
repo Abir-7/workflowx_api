@@ -5,11 +5,14 @@ import { zodCreateUserSchema } from "./user.validation";
 import zodValidator from "../../../middleware/zodValidator";
 import { upload } from "../../../middleware/fileUpload/fileUploadHandler";
 import { auth } from "../../../middleware/auth/auth";
+import { parseDataField } from "../../../middleware/fileUpload/parseDataField";
 
 const router = Router();
 
 router.post(
   "/create-user",
+  upload.single("image"),
+  parseDataField("data"),
   zodValidator(zodCreateUserSchema),
   UserController.createUser
 );
