@@ -1,36 +1,5 @@
 import { Types } from "mongoose";
 
-export interface IProjectPhase {
-  name: TPhase;
-  budget: number;
-  members: string[];
-  deadline: Date;
-  status: IPhaseStatus;
-}
-
-export interface IUpdateLog {
-  updatedBy: Types.ObjectId;
-  date: Date;
-  note: string;
-}
-
-export interface IProject {
-  _id: string;
-  name: string;
-  clientName: string;
-  projectGroup?: Types.ObjectId;
-  googleSheetLink: string;
-  teamId: Types.ObjectId;
-  assignedMembers: Types.ObjectId[];
-  phases: IProjectPhase[];
-  totalBudget: number;
-  duration: number; // in month
-  lastUpdate: IUpdateLog[];
-  description: string;
-  salesName: string;
-  status: IStatus;
-}
-
 export const status = {
   COMPLETED: "COMPLETED",
   ONGOING: "ONGOING",
@@ -58,5 +27,59 @@ export const phases = [
   "APP_DEPLOYMENT",
   "APP_DESIGN",
 ] as const;
+
+export interface IProjectPhase {
+  _id: string;
+  name: TPhase;
+  budget: number;
+  members: Types.ObjectId[];
+  deadline: Date;
+  status: IPhaseStatus;
+}
+
+export interface IUpdateLog {
+  updatedBy: Types.ObjectId;
+  date: Date;
+  note: string;
+}
+
+export interface IProject {
+  _id: string;
+  name: string;
+  clientName: string;
+  projectGroup?: Types.ObjectId;
+  googleSheetLink: string;
+  teamId: Types.ObjectId;
+  assignedMembers: Types.ObjectId[];
+  phases: IProjectPhase[];
+  totalBudget: number;
+  duration: number; // in month
+  lastUpdate: IUpdateLog[];
+  description: string;
+  salesName: string;
+  status: IStatus;
+}
+
+export interface IProjectPhaseUpdate {
+  phase: IProjectPhase;
+  type: "update" | "delete" | "add";
+}
+
+export interface IProjecUpdate {
+  _id: string;
+  name: string;
+  clientName: string;
+  projectGroup?: Types.ObjectId;
+  googleSheetLink: string;
+  teamId: Types.ObjectId;
+  assignedMembers: Types.ObjectId[];
+  phases: IProjectPhaseUpdate[];
+  totalBudget: number;
+  duration: number; // in month
+  lastUpdate: IUpdateLog[];
+  description: string;
+  salesName: string;
+  status: IStatus;
+}
 
 type TPhase = (typeof phases)[number];

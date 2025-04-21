@@ -1,5 +1,14 @@
-import { IProject } from "./project.interface";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { status } from "http-status";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
+import mongoose, { Types } from "mongoose";
+import { IProject, IProjecUpdate } from "./project.interface";
 import Project from "./project.model";
+import AppError from "../../errors/AppError";
+
+import { removeFalsyFields } from "../../utils/helper/removeFalsyField";
 
 /* eslint-disable arrow-body-style */
 const createProject = async (projectData: IProject): Promise<IProject> => {
@@ -41,9 +50,131 @@ const getProjectById = async (id: string): Promise<IProject | null> => {
 
 const updateProject = async (
   id: string,
-  updateData: Partial<IProject>
-): Promise<IProject | null> => {
-  return await Project.findByIdAndUpdate(id, updateData, { new: true });
+  updateData: Partial<IProjecUpdate>
+) => {
+  const findProject = await Project.findById(id);
+  if (!findProject) {
+    throw new AppError(status.NOT_FOUND, "Project not found");
+  }
+  const { phases, assignedMembers } = findProject;
+  if (
+    assignedMembers &&
+    updateData.assignedMembers &&
+    updateData.assignedMembers?.length > 0
+  ) {
+    const membersData = addRemoveMembers(
+      updateData.assignedMembers,
+      findProject?.assignedMembers
+    );
+    console.log("object");
+    findProject?.phases.map((phase) => {
+      phase.members = phase.members.filter((mem) => {
+        const member = mem.toString();
+        if (!membersData.dataToRemove.includes(member)) {
+          return mem;
+        }
+      });
+    });
+
+    findProject.assignedMembers = [
+      ...findProject.assignedMembers.filter((mem) => {
+        const member = mem.toString();
+        if (!membersData.dataToRemove.includes(member)) {
+          return mem;
+        }
+      }),
+      ...membersData.dataToAdd.map((mem) => new mongoose.Types.ObjectId(mem)),
+    ];
+  }
+
+  if (phases && updateData.phases) {
+    updateData.phases.map((phase) => {
+      if (!phase.phase._id) {
+        throw new AppError(status.NOT_FOUND, "Phase Id not found.");
+      }
+
+      if (phase.type === "delete") {
+        findProject.phases = findProject?.phases.filter(
+          (fphase) => fphase._id.toString() !== phase.phase._id
+        );
+      }
+
+      if (phase.type === "add") {
+        findProject?.phases.push(phase.phase);
+      }
+
+      if (phase.type === "update") {
+        const {
+          budget,
+          deadline,
+          members,
+          name,
+          status: p_status,
+        } = phase.phase;
+
+        findProject.phases.map((fphase) => {
+          if (fphase._id.toString() === phase.phase._id.toString()) {
+            if (budget) {
+              fphase.budget = budget;
+            }
+
+            if (deadline) {
+              fphase.deadline = deadline;
+            }
+
+            if (name) {
+              fphase.name = name;
+            }
+            if (status) {
+              fphase.status = p_status;
+            }
+
+            if (members) {
+              const membersData = addRemoveMembers(members, fphase.members);
+
+              fphase.members = [
+                ...fphase.members.filter((mem) => {
+                  const member = mem.toString();
+
+                  if (!membersData.dataToRemove.includes(member)) {
+                    return mem;
+                  }
+                }),
+                ...membersData.dataToAdd.map((mem) => {
+                  return new mongoose.Types.ObjectId(mem);
+                }),
+              ];
+            }
+
+            return fphase;
+          } else {
+            return fphase;
+          }
+        });
+      }
+    });
+  }
+
+  const otherData = removeFalsyFields({
+    name: updateData.name,
+    clientName: updateData.clientName,
+    projectGroup: updateData.projectGroup,
+    googleSheetLink: updateData.googleSheetLink,
+    teamId: updateData.teamId,
+    totalBudget: updateData.totalBudget,
+    duration: updateData.duration,
+    description: updateData.description,
+    salesName: updateData.salesName,
+    status: updateData.status,
+  });
+
+  for (const key in otherData) {
+    (findProject as any)[key] = otherData[key as keyof typeof otherData];
+  }
+
+  await findProject?.save();
+
+  return findProject;
 };
 
 const deleteProject = async (id: string): Promise<IProject | null> => {
@@ -56,4 +187,23 @@ export const ProjectService = {
   getProjectById,
   updateProject,
   deleteProject,
+};
+
+// utils function
+const addRemoveMembers = (
+  newArr: Types.ObjectId[],
+  prevArr: Types.ObjectId[]
+) => {
+  const updatedMembers = newArr.map((mem) => mem.toString());
+  const previousMembers = prevArr.map((mem) => mem.toString());
+  // console.log({ updatedMembers, previousMembers });
+  const dataToAdd = updatedMembers.filter(
+    (mem) => !previousMembers.includes(mem)
+  );
+
+  const dataToRemove = updatedMembers.filter((mem) =>
+    previousMembers.includes(mem)
+  );
+
+  return { dataToAdd, dataToRemove };
 };

@@ -26,7 +26,7 @@ const projectSchema = new Schema<IProject>({
         deadline: { type: Date, default: null },
         status: {
           type: String,
-          required: true,
+
           enum: Object.values(phaseStatus),
           default: "INACTIVE",
         },
@@ -35,6 +35,7 @@ const projectSchema = new Schema<IProject>({
     default: [],
     _id: true,
   },
+
   totalBudget: { type: Number, required: true },
   duration: { type: Number, required: true },
   lastUpdate: {
