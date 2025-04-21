@@ -173,7 +173,6 @@ const updateProject = async (
   }
 
   await findProject?.save();
-
   return findProject;
 };
 
