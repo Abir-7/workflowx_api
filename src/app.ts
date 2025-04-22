@@ -10,7 +10,7 @@ import path from "path";
 const app = express();
 
 const corsOption = {
-  origin: ["*"],
+  origin: ["http://localhost:3000"],
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   credentials: true,
 };
@@ -23,7 +23,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 
 app.get("/", (req, res) => {
-  const serverTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka", timeZoneName: "short" });
+  const serverTime = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Dhaka",
+    timeZoneName: "short",
+  });
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
