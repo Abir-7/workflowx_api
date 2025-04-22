@@ -8,14 +8,12 @@ const TeamSchema = new Schema<ITeam>(
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
-    projects: {
-      type: [{ type: Schema.Types.ObjectId, ref: "Project" }],
-      default: [],
-    },
     image: { type: String },
     leader: { type: Schema.Types.ObjectId, ref: "User", required: true },
     tagLine: { type: String, default: null },
+    isDeleted: { type: Boolean, default: false },
   },
+
   {
     timestamps: true,
   }

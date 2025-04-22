@@ -7,8 +7,8 @@ import sendResponse from "../../utils/sendResponse";
 import { getRelativePath } from "../../middleware/fileUpload/getRelativeFilePath";
 
 const createTeam = catchAsync(async (req: Request, res: Response) => {
-  const value = req.body;
   const userId = req.user.userId;
+  const value = req.body;
   if (req.file) {
     value.image = getRelativePath(req.file.path);
   }
@@ -53,7 +53,12 @@ const getTeamById = catchAsync(async (req: Request, res: Response) => {
 
 const updateTeam = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await TeamService.updateTeam(id, req.body);
+  const value = req.body;
+  if (req.file) {
+    value.image = getRelativePath(req.file.path);
+  }
+
+  const result = await TeamService.updateTeam(id, value);
 
   sendResponse(res, {
     success: true,

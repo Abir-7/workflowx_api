@@ -58,6 +58,7 @@ export interface IProject {
   description: string;
   salesName: string;
   status: IStatus;
+  isDeleted: boolean;
 }
 
 export interface IProjectPhaseUpdate {

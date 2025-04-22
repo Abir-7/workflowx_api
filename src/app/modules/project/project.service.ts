@@ -17,7 +17,7 @@ const createProject = async (projectData: IProject): Promise<IProject> => {
 };
 
 const getAllProjects = async (): Promise<IProject[]> => {
-  const data = await Project.find()
+  const data = await Project.find({ isDeleted: false })
     .populate({
       path: "assignedMembers",
       foreignField: "user",
@@ -43,20 +43,48 @@ const getAllProjects = async (): Promise<IProject[]> => {
 };
 
 const getProjectById = async (id: string): Promise<IProject | null> => {
-  return await Project.findById(id).populate(
-    "teamId assignedMembers projectGroup  assignedMembers lastUpdate.updatedBy"
-  );
+  const data = await Project.findOne({ _id: id }, { isDeleted: false })
+    .populate({
+      path: "assignedMembers",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName position email phone image user -_id",
+    })
+    .populate({
+      path: "phases.members",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName  image -_id",
+    })
+    .populate("teamId")
+    .populate("projectGroup")
+    .populate({
+      path: "lastUpdate.updatedBy",
+      foreignField: "user",
+      model: "UserProfile",
+      select: "fullName  image -_id",
+    });
+
+  if (!data) {
+    throw new AppError(status.NOT_FOUND, "Data not found or is deleted.");
+  }
+
+  return data;
 };
 
 const updateProject = async (
   id: string,
   updateData: Partial<IProjecUpdate>
 ) => {
-  const findProject = await Project.findById(id);
+  const findProject = await Project.findOne({ _id: id, isDeleted: false });
   if (!findProject) {
     throw new AppError(status.NOT_FOUND, "Project not found");
   }
+
   const { phases, assignedMembers } = findProject;
+
+  let removedIds: string[] = [];
+
   if (
     assignedMembers &&
     updateData.assignedMembers &&
@@ -66,7 +94,9 @@ const updateProject = async (
       updateData.assignedMembers,
       findProject?.assignedMembers
     );
-    console.log("object");
+
+    removedIds = membersData.dataToRemove;
+
     findProject?.phases.map((phase) => {
       phase.members = phase.members.filter((mem) => {
         const member = mem.toString();
@@ -130,7 +160,25 @@ const updateProject = async (
             }
 
             if (members) {
-              const membersData = addRemoveMembers(members, fphase.members);
+              let checkedMember: Types.ObjectId[] = members;
+
+              if (!updateData.assignedMembers?.length) {
+                checkedMember = members.filter((memb) => {
+                  const mem = memb.toString();
+                  if (
+                    findProject.assignedMembers
+                      .map((mem2) => mem2.toString())
+                      .includes(mem)
+                  ) {
+                    return memb;
+                  }
+                });
+              }
+
+              const membersData = addRemoveMembers(
+                checkedMember,
+                fphase.members
+              );
 
               fphase.members = [
                 ...fphase.members.filter((mem) => {
@@ -140,9 +188,13 @@ const updateProject = async (
                     return mem;
                   }
                 }),
-                ...membersData.dataToAdd.map((mem) => {
-                  return new mongoose.Types.ObjectId(mem);
-                }),
+                ...membersData.dataToAdd
+                  .map((mem) => {
+                    if (!removedIds.includes(mem)) {
+                      return new mongoose.Types.ObjectId(mem);
+                    }
+                  })
+                  .filter((mem) => !!mem),
               ];
             }
 
@@ -154,6 +206,8 @@ const updateProject = async (
       }
     });
   }
+
+  // update premitive data
 
   const otherData = removeFalsyFields({
     name: updateData.name,
@@ -177,7 +231,15 @@ const updateProject = async (
 };
 
 const deleteProject = async (id: string): Promise<IProject | null> => {
-  return await Project.findByIdAndDelete(id);
+  const data = await Project.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true }
+  );
+  if (!data) {
+    throw new Error("Data not found or already deleted.");
+  }
+  return data;
 };
 
 export const ProjectService = {
@@ -189,7 +251,7 @@ export const ProjectService = {
 };
 
 // utils function
-const addRemoveMembers = (
+export const addRemoveMembers = (
   newArr: Types.ObjectId[],
   prevArr: Types.ObjectId[]
 ) => {

@@ -6,6 +6,7 @@ const ProjectGroupSchema = new Schema<IProjectGroup>(
     name: { type: String, required: true },
     projectId: { type: String },
     link: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
