@@ -7,30 +7,35 @@ import logger from "./app/utils/logger";
 import seedAdmin from "./app/DB";
 
 process.on("uncaughtException", (err) => {
-  logger.error("Uncaught exception:", err);
+  logger.error("🔥 Uncaught Exception: ", err);
   process.exit(1);
 });
 
 process.on("unhandledRejection", (err) => {
-  logger.error("Unhandled promise rejection:", err);
-
+  logger.error("⚠️ Unhandled Promise Rejection: ", err);
   process.exit(1);
 });
 
 const main = async () => {
-  await mongoose.connect(appConfig.database.dataBase_uri as string);
-  logger.info("MongoDB connected");
-  await seedAdmin();
-  server.listen(
-    Number(appConfig.server.port),
-    appConfig.server.ip as string,
-    () => {
-      logger.info(
-        `Example app listening on port ${appConfig.server.port} & ip:${
-          appConfig.server.ip as string
-        }`
-      );
-    }
-  );
+  try {
+    await mongoose.connect(appConfig.database.dataBase_uri as string);
+    logger.info("✅ MongoDB connected successfully!");
+
+    await seedAdmin();
+    logger.info("👤 Admin user seeded successfully!");
+
+    server.listen(
+      Number(appConfig.server.port),
+      appConfig.server.ip as string,
+      () => {
+        logger.info(
+          `🚀 Server is running at http://${appConfig.server.ip}:${appConfig.server.port}`
+        );
+      }
+    );
+  } catch (err) {
+    logger.error("❌ Error connecting to MongoDB: ", err);
+  }
 };
-main().catch((err) => logger.error("Error connecting to MongoDB:", err));
+
+main().catch((err) => logger.error("❌ Unexpected Error: ", err));
