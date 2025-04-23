@@ -11,4 +11,5 @@ router.patch("/verify-user", auth_controller_1.AuthController.verifyUser);
 router.patch("/forgot-password-request", auth_controller_1.AuthController.forgotPasswordRequest);
 router.patch("/reset-password", auth_controller_1.AuthController.resetPassword);
 router.patch("/update-password", (0, auth_1.auth)("USER"), auth_controller_1.AuthController.updatePassword);
+router.patch("/resend-code", auth_controller_1.AuthController.reSendOtp);
 exports.AuthRoute = router;

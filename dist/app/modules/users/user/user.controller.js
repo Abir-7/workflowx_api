@@ -17,9 +17,12 @@ const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../utils/sendResponse"));
 const user_service_1 = require("./user.service");
+const getRelativeFilePath_1 = require("../../../middleware/fileUpload/getRelativeFilePath");
 const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const userData = req.body;
-    const result = yield user_service_1.UserService.createUser(userData);
+    const image = (0, getRelativeFilePath_1.getRelativePath)((_a = req.file) === null || _a === void 0 ? void 0 : _a.path);
+    const result = yield user_service_1.UserService.createUser(Object.assign(Object.assign({}, userData), { image }));
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
@@ -30,7 +33,7 @@ const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const updateProfileImage = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const filePath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
-    const result = yield user_service_1.UserService.updateProfileImage(filePath);
+    const result = yield user_service_1.UserService.updateProfileImage(filePath, req.user.userEmail);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
@@ -38,4 +41,29 @@ const updateProfileImage = (0, catchAsync_1.default)((req, res) => __awaiter(voi
         data: result,
     });
 }));
-exports.UserController = { createUser, updateProfileImage };
+const updateProfileData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userData = req.body;
+    const result = yield user_service_1.UserService.updateProfileData(userData, req.user.userEmail);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "Profile info updated successfully.",
+        data: result,
+    });
+}));
+const updateUserRole = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userData = req.body;
+    const result = yield user_service_1.UserService.updateUserRole(userData);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "User role updated successfully.",
+        data: result,
+    });
+}));
+exports.UserController = {
+    createUser,
+    updateProfileImage,
+    updateProfileData,
+    updateUserRole,
+};

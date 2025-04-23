@@ -4,5 +4,6 @@ exports.userRole = exports.userRoles = void 0;
 exports.userRoles = {
     ADMIN: "ADMIN",
     USER: "USER",
+    LEADER: "LEADER",
 };
 exports.userRole = Object.values(exports.userRoles);

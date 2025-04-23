@@ -26,7 +26,7 @@ const main = async () => {
 
     server.listen(
       Number(appConfig.server.port),
-      appConfig.server.ip as string,
+      // appConfig.server.ip as string,
       () => {
         logger.info(
           `🚀 Server is running at http://${appConfig.server.ip}:${appConfig.server.port}`

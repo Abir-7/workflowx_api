@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserProfile = void 0;
 const mongoose_1 = require("mongoose");
+const userProfile_interface_1 = require("./userProfile.interface");
 const userProfileSchema = new mongoose_1.Schema({
     fullName: { type: String },
-    nickname: { type: String },
+    position: { type: String, enum: Object.values(userProfile_interface_1.Position) },
+    nickName: { type: String },
     dateOfBirth: { type: Date },
     email: { type: String, unique: true },
     phone: { type: String },

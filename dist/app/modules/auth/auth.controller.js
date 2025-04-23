@@ -83,6 +83,16 @@ const updatePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         message: "Password successfully updated",
     });
 }));
+const reSendOtp = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    const result = yield auth_service_1.AuthService.reSendOtp(email);
+    (0, sendResponse_1.default)(res, {
+        data: result,
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "Verification Code send successfully",
+    });
+}));
 exports.AuthController = {
     verifyUser,
     forgotPasswordRequest,
@@ -90,4 +100,5 @@ exports.AuthController = {
     userLogin,
     getNewAccessToken,
     updatePassword,
+    reSendOtp,
 };

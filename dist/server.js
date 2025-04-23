@@ -1,9 +1,5 @@
 "use strict";
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-/* eslint-disable no-var */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-
 var __awaiter =
   (this && this.__awaiter) ||
   function (thisArg, _arguments, P, generator) {
@@ -49,28 +45,33 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const logger_1 = __importDefault(require("./app/utils/logger"));
 const DB_1 = __importDefault(require("./app/DB"));
 process.on("uncaughtException", (err) => {
-  logger_1.default.error("Uncaught exception:", err);
+  logger_1.default.error("🔥 Uncaught Exception: ", err);
   process.exit(1);
 });
 process.on("unhandledRejection", (err) => {
-  logger_1.default.error("Unhandled promise rejection:", err);
+  logger_1.default.error("⚠️ Unhandled Promise Rejection: ", err);
   process.exit(1);
 });
 const main = () =>
   __awaiter(void 0, void 0, void 0, function* () {
-    yield mongoose_1.default.connect(config_1.appConfig.database.dataBase_uri);
-    logger_1.default.info("MongoDB connected");
-    (0, DB_1.default)();
-    app_1.default.listen(
-      Number(config_1.appConfig.server.port),
-      config_1.appConfig.server.ip,
-      () => {
-        logger_1.default.info(
-          `Example app listening on port ${config_1.appConfig.server.port} & ip:${config_1.appConfig.server.ip}`
-        );
-      }
-    );
+    try {
+      yield mongoose_1.default.connect(
+        config_1.appConfig.database.dataBase_uri
+      );
+      logger_1.default.info("✅ MongoDB connected successfully!");
+      yield (0, DB_1.default)();
+      logger_1.default.info("👤 Admin user seeded successfully!");
+      app_1.default.listen(
+        Number(config_1.appConfig.server.port),
+        // appConfig.server.ip as string,
+        () => {
+          logger_1.default.info(
+            `🚀 Server is running at http://${config_1.appConfig.server.ip}:${config_1.appConfig.server.port}`
+          );
+        }
+      );
+    } catch (err) {
+      logger_1.default.error("❌ Error connecting to MongoDB: ", err);
+    }
   });
-main().catch((err) =>
-  logger_1.default.error("Error connecting to MongoDB:", err)
-);
+main().catch((err) => logger_1.default.error("❌ Unexpected Error: ", err));
